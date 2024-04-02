@@ -6,7 +6,7 @@ __date__ = "17/01/2017"
 import numpy
 from numpy.testing import assert_equal, assert_almost_equal
 import unittest
-from shadow4.beam.beam import Beam
+from shadow4.beam.s4_beam import S4Beam as Beam
 
 class TestBeam(unittest.TestCase):
 

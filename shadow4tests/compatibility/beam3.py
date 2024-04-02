@@ -6,7 +6,7 @@ Useful for plotting shadow4 results with old shadow3 plotxy, histo1, etc.
 import numpy
 
 from Shadow import Beam as Beam_shadow3
-from shadow4.beam.beam import Beam as Beam_shadow4
+from shadow4.beam.s4_beam import S4Beam as Beam_shadow4
 
 class Beam3(Beam_shadow3):
 

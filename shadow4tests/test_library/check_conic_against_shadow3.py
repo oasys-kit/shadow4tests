@@ -11,7 +11,7 @@ import Shadow
 #
 # minishadow
 #
-from shadow4.beam.beam import Beam
+from shadow4.beam.s4_beam import S4Beam as Beam
 from shadow4tests.compatibility.beam3 import Beam3
 from shadow4.optical_surfaces.s4_conic import S4Conic
 

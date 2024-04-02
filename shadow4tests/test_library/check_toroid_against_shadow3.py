@@ -11,7 +11,7 @@ from shadow4tests.compatibility.beam3 import Beam3
 #
 # shadow4
 #
-from shadow4.beam.beam import Beam
+from shadow4.beam.s4_beam import S4Beam as Beam
 from shadow4.optical_surfaces.s4_toroid import S4Toroid
 
 

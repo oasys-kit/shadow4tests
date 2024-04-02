@@ -7,7 +7,7 @@ from numpy.testing import assert_equal, assert_almost_equal
 
 import Shadow
 
-from shadow4.beam.beam import Beam
+from shadow4.beam.s4_beam import S4Beam as Beam
 from shadow4.optical_surfaces.s4_mesh import S4Mesh
 
 def write_bragg_preprocessor_file():

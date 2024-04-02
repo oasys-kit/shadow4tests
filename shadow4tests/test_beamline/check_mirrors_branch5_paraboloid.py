@@ -7,11 +7,11 @@ set_qt()
 from shadow4.tools.graphics import plotxy
 
 from shadow4.beamline.optical_elements.mirrors.s4_paraboloid_mirror import S4ParaboloidMirror, S4ParaboloidMirrorElement
-from shadow4.syned.shape import Convexity, Direction, Side
+from syned.beamline.shape import Convexity, Direction, Side
 
-from shadow4.beamline.s4_optical_element import SurfaceCalculation
+from shadow4.beamline.s4_optical_element_decorators import SurfaceCalculation
 
-from shadow4.beam.beam import Beam
+from shadow4.beam.s4_beam import S4Beam as Beam
 
 
 
@@ -44,7 +44,7 @@ def run_ellipsoid(kind="paraboloid"):
     # shadow4
     #
 
-    from shadow4.syned.element_coordinates import ElementCoordinates
+    from syned.beamline.element_coordinates import ElementCoordinates
 
     oe = define_beamline()[0]
 
@@ -101,7 +101,7 @@ def run_ellipsoid(kind="paraboloid"):
                 convexity=convexity,
                 parabola_parameter=0.0,
                 at_infinity=at_infinity,
-                pole_to_focus=None,
+                pole_to_focus=0.0,
                 p_focus=p_focus,
                 q_focus=q_focus,
                 grazing_angle=grazing_angle,
@@ -118,15 +118,16 @@ def run_ellipsoid(kind="paraboloid"):
                 q=oe.T_IMAGE,
                 angle_radial=numpy.radians(oe.T_INCIDENCE),
                 ),
+        input_beam=beam4,
     )
 
-    print(mirror1.info())
+    print(mirror1.to_python_code())
 
     #
     # run
     #
 
-    beam4, mirr4 = mirror1.trace_beam(beam_in=beam4, flag_lost_value=-11000)
+    beam4, mirr4 = mirror1.trace_beam()
 
 
 

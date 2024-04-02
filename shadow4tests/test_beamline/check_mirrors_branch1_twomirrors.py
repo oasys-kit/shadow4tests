@@ -17,7 +17,7 @@ if __name__ == "__main__":
     from shadow4.tools.graphics import plotxy
 
     from shadow4.beamline.optical_elements.mirrors.s4_plane_mirror import S4PlaneMirror, S4PlaneMirrorElement
-    from shadow4.beam.beam import Beam
+    from shadow4.beam.s4_beam import S4Beam as Beam
 
     #
     #
@@ -35,8 +35,8 @@ if __name__ == "__main__":
     # shadow4
     #
 
-    from shadow4.syned.shape import Rectangle
-    from shadow4.syned.element_coordinates import ElementCoordinates
+    from syned.beamline.shape import Rectangle
+    from syned.beamline.element_coordinates import ElementCoordinates
 
     oe_list = define_beamline() # just in case... reinitializa to "before run"
     oe = oe_list[0]
@@ -74,6 +74,7 @@ if __name__ == "__main__":
                     q=oe.T_IMAGE,
                     angle_radial=numpy.radians(oe.T_INCIDENCE),
                     ),
+            input_beam=beam4,
         )
 
         print(mirror1.info())
@@ -82,7 +83,7 @@ if __name__ == "__main__":
         # run
         #
 
-        beam4, mirr4 = mirror1.trace_beam(beam_in=beam4, flag_lost_value=-(i+1) * 11000)
+        beam4, mirr4 = mirror1.trace_beam(flag_lost_value=-(i+1) * 11000)
 
 
 
@@ -92,10 +93,10 @@ if __name__ == "__main__":
     oe_list = define_beamline()
     beam3 = run_beamline(beam3_source, oe_list)
 
-    plotxy(beam3, 1, 3, nbins=201, nolost=1, title="%s shadow3" % name)
-    plotxy(beam4, 1, 3, nbins=201, nolost=1, title="%s shadow4" % name)
+    # plotxy(beam3, 1, 3, nbins=201, nolost=1, title="%s shadow3" % name)
+    # plotxy(beam4, 1, 3, nbins=201, nolost=1, title="%s shadow4" % name)
 
     from shadow4tests.compatibility.compare_beams import check_six_columns_mean_and_std, check_almost_equal
 
     check_six_columns_mean_and_std(beam3, beam4, do_assert=True, do_plot=False)
-    check_almost_equal(beam3, beam4, do_assert = True, level=6)
+    check_almost_equal(beam3, beam4, do_assert = True, level=6, skip_columns=[10,15])

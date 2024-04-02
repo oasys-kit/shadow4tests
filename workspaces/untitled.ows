@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="" description="" working_directory="/users/srio/Oasys" workspace_units="1">
+	<nodes>
+		<node id="0" name="Remote Github Repository Downloader" qualified_name="oasys.widgets.tools.ow_remote_github_downloader.OWRemoteGithubDownloader" project_name="OASYS1" version="" title="Remote Github Repository Downloader" position="(149.0, 148.0)" />
+		<node id="1" name="Undulator Spectrum" qualified_name="orangecontrib.xoppy.widgets.source.undulator_spectrum.OWundulator_spectrum" project_name="OASYS1-XOPPY" version="" title="Undulator Spectrum" position="(184.0, 302.0)" />
+	</nodes>
+	<links />
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties node_id="0" format="pickle">gASViAEAAAAAAAB9lCiMDmJlYW1fZmlsZV9uYW1llIwAlIwKcmVwb3NpdG9yeZSMO2h0dHBzOi8v
+Z2l0aHViLmNvbS9zcmlvL3NoYWRvdzR0ZXN0cy90cmVlL21hc3Rlci93b3Jrc3BhY2VzlIwTc2F2
+ZWRXaWRnZXRHZW9tZXRyeZSMA3NpcJSMDl91bnBpY2tsZV90eXBllJOUjAxQeVF0NS5RdENvcmWU
+jApRQnl0ZUFycmF5lENCAdnQywADAAAAAAONAAAAKAAABhYAAAHcAAADjQAAAE0AAAYWAAAB3AAA
+AAAAAAAABpAAAAONAAAATQAABhYAAAHclIWUh5RSlIwMc2VsZWN0ZWRGaWxllIwMdW50aXRsZWQu
+b3dzlIwNc2VsZWN0ZWRJbmRleJSMB2NvcHlyZWeUjA5fcmVjb25zdHJ1Y3RvcpSTlIwIYnVpbHRp
+bnOUjARsaXN0lJOUaBcph5RSlEsAYYwMc2VydmVyc19saXN0lEsKjA91cmxzZWxlY3RlZGZpbGWU
+aAJ1Lg==
+</properties>
+		<properties node_id="1" format="literal">{'DISTANCE': 30.0, 'ELECTRONBEAMDIVERGENCEH': 1.05e-05, 'ELECTRONBEAMDIVERGENCEV': 3.9e-06, 'ELECTRONBEAMSIZEH': 0.000395, 'ELECTRONBEAMSIZEV': 9.9e-06, 'ELECTRONCURRENT': 0.2, 'ELECTRONENERGY': 6.04, 'ELECTRONENERGYSPREAD': 0.001, 'GAPH': 0.001, 'GAPH_CENTER': 0.0, 'GAPV': 0.001, 'GAPV_CENTER': 0.0, 'KH': 0.0, 'KPHASE': 0.0, 'KV': 1.68, 'METHOD': 2, 'NPERIODS': 222, 'PERIODID': 0.018, 'PHOTONENERGYMAX': 55000.0, 'PHOTONENERGYMIN': 3000.0, 'PHOTONENERGYPOINTS': 500, 'USEEMITTANCES': 1, 'savedWidgetGeometry': None, 'view_type': 1}</properties>
+	</node_properties>
+</scheme>
