@@ -19,7 +19,7 @@ def vy(ABCDE):
 
     Q = numpy.power(2, -1.0/3) * numpy.power((D1 + numpy.sqrt(D1**2 - 4 * D0**3)), 1.0/3)
     S = 0.5 * numpy.sqrt((1.0/3) * (Q + D0 / Q) - 2 * k / 3)
-    if numpy.abs(S) < 1e-6:
+    if numpy.abs(S) < 1e-3:
         print(">>>> changed sign of sqrt")
         Q = numpy.power(2, -1.0/3) * numpy.power((D1 - numpy.sqrt(D1**2 - 4 * D0**3)), 1.0/3)
         S = 0.5 * numpy.sqrt((1.0/3) * (Q + D0 / Q) - 2 * k / 3)
@@ -102,39 +102,39 @@ def mquartic(a, b, c, d):
     return sol1, sol2, sol3, sol4
 
 def newton(f,Df,x0,epsilon,max_iter):
-    '''Approximate solution of f(x)=0 by Newton's method.
-
-    Parameters
-    ----------
-    f : function
-        Function for which we are searching for a solution f(x)=0.
-    Df : function
-        Derivative of f(x).
-    x0 : number
-        Initial guess for a solution f(x)=0.
-    epsilon : number
-        Stopping criteria is abs(f(x)) < epsilon.
-    max_iter : integer
-        Maximum number of iterations of Newton's method.
-
-    Returns
-    -------
-    xn : number
-        Implement Newton's method: compute the linear approximation
-        of f(x) at xn and find x intercept by the formula
-            x = xn - f(xn)/Df(xn)
-        Continue until abs(f(xn)) < epsilon and return xn.
-        If Df(xn) == 0, return None. If the number of iterations
-        exceeds max_iter, then return None.
-
-    Examples
-    --------
-    >>> f = lambda x: x**2 - x - 1
-    >>> Df = lambda x: 2*x - 1
-    >>> newton(f,Df,1,1e-8,10)
-    Found solution after 5 iterations.
-    1.618033988749989
-    '''
+    # '''Approximate solution of f(x)=0 by Newton's method.
+    #
+    # Parameters
+    # ----------
+    # f : function
+    #     Function for which we are searching for a solution f(x)=0.
+    # Df : function
+    #     Derivative of f(x).
+    # x0 : number
+    #     Initial guess for a solution f(x)=0.
+    # epsilon : number
+    #     Stopping criteria is abs(f(x)) < epsilon.
+    # max_iter : integer
+    #     Maximum number of iterations of Newton's method.
+    #
+    # Returns
+    # -------
+    # xn : number
+    #     Implement Newton's method: compute the linear approximation
+    #     of f(x) at xn and find x intercept by the formula
+    #         x = xn - f(xn)/Df(xn)
+    #     Continue until abs(f(xn)) < epsilon and return xn.
+    #     If Df(xn) == 0, return None. If the number of iterations
+    #     exceeds max_iter, then return None.
+    #
+    # Examples
+    # --------
+    # >>> f = lambda x: x**2 - x - 1
+    # >>> Df = lambda x: 2*x - 1
+    # >>> newton(f,Df,1,1e-8,10)
+    # Found solution after 5 iterations.
+    # 1.618033988749989
+    # '''
     xn = x0
     for n in range(0,max_iter):
         fxn = f(xn)
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     # https://mathworld.wolfram.com/QuarticFormula.html
 
 
-    if True:
+    if False:
         import numpy
         h_output2 = numpy.polynomial.polynomial.polyroots([DCBA1[0], DCBA1[1], DCBA1[2], DCBA1[3], DCBA1[4]])
         print("roots: ", h_output2)
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         z = h_output2[3] ; print("np: 0 =? ", DCBA1[4] * z ** 4 + DCBA1[3] * z ** 3 + DCBA1[2] * z ** 2 + DCBA1[1] * z + DCBA1[0] )
 
 
-    if True:
+    if False:
 
         # out = single_quartic(1.0, AA[k], BB[k], CC[k], DD[k])
         print(DCBA1[4], DCBA1[3], DCBA1[2], DCBA1[1], DCBA1[0])
@@ -190,6 +190,7 @@ if __name__ == "__main__":
     if True:
         # ABCDE = [1, 7, -806, -1050, 38322]
         ABCDE = [ 1, -10.002177259318255, 149.91291022442874, -624.6460852022283, -8745.02188873291]
+        ABCDE = [1, -32.73663672556182, 408.4190027490258, -2299.701822526753, 4891.1455078125]
         roots = quartic_roots(ABCDE, modified=1, zero_below=1e-6)
         print("roots: ", roots)
         # z0 = roots[0][0] ; print("modified: 0 =? ", ABCDE[0] * z0 ** 4 + ABCDE[1] * z0 ** 3 + ABCDE[2] * z0 ** 2 + ABCDE[3] * z0 + ABCDE[4])
@@ -233,7 +234,7 @@ if __name__ == "__main__":
         # Dp = lambda x: 3 * x ** 2 - 2 * x
         # approx = newton(p, Dp, 1, 1e-10, 10)
         # print(approx)
-
+        ABCDE = [1, -32.73663672556182, 408.4190027490258, -2299.701822526753, 4891.1455078125]
         p = lambda x: pol4(x, ABCDE=ABCDE)
         Dp = lambda x: dpol4(x, ABCDE=ABCDE)
 
@@ -241,14 +242,15 @@ if __name__ == "__main__":
         print(approx)
         z3 = roots[0][3] ; print("Newton: 0 =? ", pol4(approx, ABCDE=ABCDE))
 
-        approx = newton(p, Dp, -5, 1e-10, 10)
-        print(approx)
-        z3 = roots[0][3] ; print("Newton: 0 =? ", pol4(approx, ABCDE=ABCDE))
+        # approx = newton(p, Dp, -5, 1e-10, 10)
+        # print(approx)
+        # z3 = roots[0][3] ; print("Newton: 0 =? ", pol4(approx, ABCDE=ABCDE))
 
 
-    if True:
+    if False:
         # ABCDE = [1, 7, -806, -1050, 38322]
         ABCDE = [ 1, -10.002177259318255, 149.91291022442874, -624.6460852022283, -8745.02188873291]
+        ABCDE = [1, -32.73663672556182, 408.4190027490258, -2299.701822526753, 4891.1455078125]
         roots = vy(ABCDE)
         print("roots: ", roots)
 

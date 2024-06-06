@@ -38,22 +38,24 @@ def s4(r_maj=10.0, r_min=1.0, P1=0, P2=0, P3=0, V1=0, V2=1, V3=0):
 
 def m4(r_maj=10.0, r_min=1.0, P1=0, P2=0, P3=0, V1=0, V2=1, V3=0):
     A = r_maj ** 2 - r_min ** 2
-    # B = -(r_maj ** 2 + r_min ** 2)
 
     PdotV = P1 * V1 + P2 * V2 + P3 * V3
-    PP = P1**2 + P2**2 + P3**2
+    PdotP = P1**2 + P2**2 + P3**2
 
     AA = 4 * PdotV
 
-    BB = 4 * PdotV**2 + 2 * (A + PP**2) - 4 * r_maj**2 * (V2**2 + V3**2)
+    BB = 4 * PdotV**2 + 2 * (A + PdotP) - 4 * r_maj**2 * (V2**2 + V3**2)
 
-    CC = 4 * PdotV * (A + PP**2) - 8 * r_maj**2 * (P2*V2 + P3*V3)
+    CC = 4 * PdotV * (A + PdotP) - 8 * r_maj**2 * (P2*V2 + P3*V3)
 
-    DD = (A + PP**2)**2 - 4 * r_maj**2 * (P2**2 + P3**2)
+    DD = (A + PdotP)**2 - 4 * r_maj**2 * (P2**2 + P3**2)
 
     return 1, AA, BB, CC, DD
 
 if __name__ == "__main__":
     from numpy import sqrt
-    print(s4(r_maj=10.0, r_min=9.0, P1=0, P2=1, P3=1, V1=1/sqrt(3), V2=1/sqrt(3), V3=1/sqrt(3)))
-    print(m4(r_maj=10.0, r_min=9.0, P1=0, P2=1, P3=1, V1=1/sqrt(3), V2=1/sqrt(3), V3=1/sqrt(3)))
+    # print(s4(r_maj=10.0, r_min=9.0, P1=0, P2=1, P3=1, V1=1/sqrt(3), V2=1/sqrt(3), V3=1/sqrt(3)))
+    # print(m4(r_maj=10.0, r_min=9.0, P1=0, P2=1, P3=1, V1=1/sqrt(3), V2=1/sqrt(3), V3=1/sqrt(3)))
+
+    print(s4(r_maj=520.859, r_min=0.006347, P1=-4.08432e-07, P2=-9.99994, P3=-520.83, V1=4.65873e-06, V2=0.999994, V3=-0.00349504))
+    print(m4(r_maj=520.859, r_min=0.006347, P1=-4.08432e-07, P2=-9.99994, P3=-520.83, V1=4.65873e-06, V2=0.999994, V3=-0.00349504))
