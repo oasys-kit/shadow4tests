@@ -153,5 +153,57 @@ class TestJonesConventions(unittest.TestCase):
                                     err_msg="%s alpha=%d use_standard=%d" % (name, alpha_deg, use_standard))
 
 
+class TestCrystalStandardJones(unittest.TestCase):
+    # method_efields_management=2: standard Jones algebra (angle chi, passive R(chi), right-handed frames).
+    # It must give the same electric field as the default calculation in the SHADOW frame.
+
+    def test_standard_vs_shadow(self):
+        rng = numpy.random.default_rng(11)
+        for alpha_deg in [0, 30, 45, 90, 135, 250]:
+            J = rng.normal(size=(2, 2)) + 1j * rng.normal(size=(2, 2))   # standard convention
+            beam = make_beam(numpy.radians(alpha_deg), rng.normal() + 1j * rng.normal(),
+                             rng.normal() + 1j * rng.normal())
+            args = (V_IN, V_OUT, numpy.array([J[0, 0]]), numpy.array([J[1, 1]]))
+            kw = dict(r_SP=numpy.array([J[0, 1]]), r_PS=numpy.array([J[1, 0]]))
+            s0, s1, s_S, s_P = S4CrystalElement._calculate_jones_and_efield_directions_standard(None, beam, *args, **kw)
+            o0, o1, o_S, o_P = S4CrystalElement._calculate_jones_and_efield_directions(None, beam, None, *args,
+                                                                                     use_standard=1, **kw)
+            field_standard = s0[:, None] * s_S + s1[:, None] * (-s_P)       # components along (u_s,f, -u_p,f)
+            field_shadow = o0[:, None] * o_S + o1[:, None] * o_P
+            assert_allclose(field_standard, field_shadow, atol=1e-12, err_msg="alpha=%d" % alpha_deg)
+
+    def test_trace_method_0_vs_2(self):
+        # full trace: Si 111 at 8 keV, crystal rotated 45 deg around the beam, elliptically polarized source
+        from syned.beamline.element_coordinates import ElementCoordinates
+        from shadow4.sources.source_geometrical.source_geometrical import SourceGeometrical
+        from shadow4.beamline.optical_elements.crystals.s4_plane_crystal import S4PlaneCrystal, S4PlaneCrystalElement
+
+        src = SourceGeometrical(nrays=200, seed=1234)
+        src.set_energy_distribution_singleline(value=8000, unit='eV')
+        src.set_spatial_type_rectangle(width=1e-3, height=1e-3)
+        src.set_angular_distribution_uniform(-20e-6, 20e-6, -20e-6, 20e-6)
+        src.set_polarization(polarization_degree=0.7, phase_diff=numpy.pi / 3, coherent_beam=True)
+        beam = src.get_beam()
+
+        out = {}
+        for method in [0, 2]:
+            oe = S4PlaneCrystal(name="xtal", material="Si", miller_index_h=1, miller_index_k=1, miller_index_l=1,
+                                thickness=0.010, f_central=True, f_phot_cent=0, phot_cent=8000.0,
+                                material_constants_library_flag=1, method_efields_management=method)
+            el = S4PlaneCrystalElement(optical_element=oe,
+                                       coordinates=ElementCoordinates(p=1.0, q=1.0, angle_radial=0.0,
+                                                                      angle_azimuthal=numpy.radians(45.0),
+                                                                      angle_radial_out=0.0),
+                                       input_beam=beam)
+            b, _ = el.trace_beam()
+            j0, j1 = b.get_jones_components()
+            e_S, e_P = b.get_efield_directions()
+            out[method] = (j0[:, None] * e_S + j1[:, None] * e_P, b.get_columns([30, 31, 32, 33]))
+
+        self.assertGreater(numpy.abs(out[0][1][0]).max(), 0.1)          # something is reflected
+        assert_allclose(out[2][0], out[0][0], atol=1e-10)                # same complex electric field
+        assert_allclose(out[2][1], out[0][1], atol=1e-10)                # same Stokes parameters
+
+
 if __name__ == "__main__":
     unittest.main()
