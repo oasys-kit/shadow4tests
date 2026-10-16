@@ -40,9 +40,9 @@ def get_source(P, nrays=5):
     return s.get_beam()
 
 
-def trace_plate(beam, alpha=0.0, f_detune=2, detune_angle=0.0, detune_half_darwin_widths=6.0, is_thick=0):
+def trace_plate(beam, alpha=0.0, f_detune=2, detune_angle=0.0, detune_half_darwin_widths=6.0):
     oe = S4PlanePhasePlateCrystal(material="Si", miller_index_h=HKL[0], miller_index_k=HKL[1], miller_index_l=HKL[2],
-                                  thickness=THICKNESS, is_thick=is_thick, f_central=1, phot_cent=ENERGY,
+                                  thickness=THICKNESS, f_central=1, phot_cent=ENERGY,
                                   f_detune=f_detune, detune_angle=detune_angle, detune_half_darwin_widths=detune_half_darwin_widths)
     el = S4PlanePhasePlateCrystalElement(optical_element=oe,
                                          coordinates=ElementCoordinates(p=1, q=1, angle_azimuthal=alpha),
@@ -113,10 +113,6 @@ class TestPhasePlateCrystal(unittest.TestCase):
         out1, _ = trace_plate(get_source(1.0), f_detune=1, detune_angle=-5.0 * darwin_half_width)
         out2, _ = trace_plate(get_source(1.0), f_detune=2, detune_half_darwin_widths=-5.0)
         assert_allclose(out1.get_column(23), out2.get_column(23), rtol=1e-6)
-
-    def test_thick_crystal_not_allowed(self):
-        with self.assertRaises(ValueError):
-            trace_plate(get_source(1.0), is_thick=1)
 
 
 if __name__ == "__main__":
