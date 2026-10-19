@@ -54,6 +54,21 @@ class TestPreReflFresnel(unittest.TestCase):
         rs, rp = amplitudes(n2, 1e-3, 0, energy=2.0)
         assert_allclose([rs[0], rp[0]], [-1.0, -1.0], atol=1e-4)
 
+    def test_absorbing_incident_medium(self):
+        # glass (n = 1.51 + i k, slightly absorbing) to air: the amplitudes must be continuous with the lossless case.
+        # With the principal square root for cos(theta2), the total internal reflection gave a growing evanescent
+        # wave (phases reversed, i.e., reversed handedness in a Fresnel rhomb); the root must be the decaying
+        # wave in total reflection and the outgoing wave in partial reflection (e.g., at the internal Brewster angle).
+        n, k = 1.51, 1e-8
+        for theta1_deg in [0.0, 20.0, 33.4, 40.0, 48.62, 60.0, 80.0]:
+            grazing_mrad = 1e3 * (numpy.pi / 2 - numpy.radians(theta1_deg))
+            rs0, rp0 = amplitudes(1 / n + 0j, grazing_mrad, 0, energy=2.0)                 # lossless, relative index
+            for n1, n2 in [(1.0 + 0j, 1 / (n + 1j * k)),                                  # relative index (SHADOW mirror)
+                           (n + 1j * k, 1.0 + 0j)]:                                       # absolute indices
+                rs, rp = amplitudes(n2, grazing_mrad, 0, n1=n1, energy=2.0)
+                assert_allclose([rs[0], rp[0]], [rs0[0], rp0[0]], atol=1e-6,
+                                err_msg="theta1=%g deg, n1=%s, n2=%s" % (theta1_deg, n1, n2))
+
 
 if __name__ == "__main__":
     unittest.main()
