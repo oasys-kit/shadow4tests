@@ -54,6 +54,18 @@ class TestWigglerHandedness(unittest.TestCase):
                 self.assertTrue(numpy.all(numpy.sign(P3[mask]) == expected),
                                 msg="curvature %+d, %s the orbit plane" % (sign_curv, side))
 
+    def test_vertical_symmetry(self):
+        # the vertical distribution of the rays must be symmetric with respect to the orbit plane (a half-bin shift
+        # of the sampled psi, -3 urad for 101 points, appeared when the cdf was computed with numpy.cumsum)
+        for flag_interpolation in [1, 0]:
+            light_source = wiggler_light_source(nrays=50000)
+            light_source.get_magnetic_structure()._flag_interpolation = flag_interpolation
+            zp = light_source.get_beam().get_column(6, nolost=1)
+            n = zp.size
+            self.assertLess(abs(zp.mean()), 4 * zp.std() / numpy.sqrt(n), msg="flag_interpolation=%d" % flag_interpolation)
+            self.assertLess(abs((zp > 0).sum() - (zp < 0).sum()), 4 * numpy.sqrt(n),
+                            msg="flag_interpolation=%d" % flag_interpolation)
+
 
 if __name__ == "__main__":
     unittest.main()

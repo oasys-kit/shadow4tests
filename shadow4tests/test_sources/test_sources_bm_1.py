@@ -4,9 +4,7 @@ def check_congruence(oe0):
 
 
 if __name__ == "__main__":
-    from srxraylib.plot.gol import set_qt
 
-    set_qt()
 
     from syned.storage_ring.electron_beam import ElectronBeam
     from shadow4.sources.bending_magnet.s4_bending_magnet import S4BendingMagnet

@@ -11,8 +11,6 @@ def check_congruence(oe):
 if __name__ == "__main__":
     import numpy
 
-    from srxraylib.plot.gol import set_qt
-    set_qt()
 
     from shadow4.tools.graphics import plotxy
 
