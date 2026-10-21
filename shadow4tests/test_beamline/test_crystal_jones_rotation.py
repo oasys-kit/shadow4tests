@@ -2,7 +2,8 @@ __authors__ = ["M Sanchez del Rio - ESRF ISDD Advanced Analysis and Modelling"]
 __license__ = "MIT"
 
 #
-# Regression test for the Jones rotation R(alpha) applied in crystal diffraction.
+# Regression test for the Jones rotation R(alpha) applied in crystal diffraction (S4Beam.calculate_jones_scattering,
+# used by S4CrystalElement and S4MosaicCrystalElement).
 # R must be the passive (projection) matrix R_jk = (scattering-plane versor j) . (incident versor k);
 # using its transpose rotates the field the wrong way for alpha not multiple of 90 deg.
 #
@@ -14,11 +15,9 @@ from numpy.testing import assert_allclose
 from shadow4.beam.s4_beam import S4Beam
 from shadow4.tools.arrayofvectors import vector_cross, vector_norm, vector_dot
 from shadow4.beamline.optical_elements.crystals.s4_crystal import S4CrystalElement
-from shadow4.beamline.optical_elements.mosaic_crystals.s4_mosaic_crystal import S4MosaicCrystalElement
 
 METHODS = {
-    "S4CrystalElement": S4CrystalElement._calculate_jones_and_efield_directions,
-    "S4MosaicCrystalElement": S4MosaicCrystalElement._calculate_jones_and_efield_directions,
+    "S4Beam.calculate_jones_scattering": S4Beam.calculate_jones_scattering,
 }
 
 THETA = numpy.radians(20.0)
@@ -41,7 +40,7 @@ def make_beam(alpha, j0, j1):
 
 
 def field_out(method, beam, r_s, r_p):
-    j0, j1, ee_S, ee_P = method(None, beam, None, V_IN, V_OUT, numpy.array([r_s]), numpy.array([r_p]))
+    j0, j1, ee_S, ee_P = method(beam, V_OUT, numpy.array([r_s]), numpy.array([r_p]))
     return j0[:, None] * ee_S + j1[:, None] * ee_P
 
 
@@ -105,7 +104,7 @@ class TestCrystalJonesForwardScattering(unittest.TestCase):
         beam.set_jones_components(j0, j1, e_S=e_S, e_P=e_P)
 
         for name, method in METHODS.items():
-            o0, o1, ee_S, ee_P = method(None, beam, None, v_in, v_out, r_s, r_p)
+            o0, o1, ee_S, ee_P = method(beam, v_out, r_s, r_p)
             self.assertFalse(numpy.isnan(o0).any() or numpy.isnan(o1).any(), msg=name)
             for k in [0, 2]:
                 assert_allclose(ee_S[k], e_S[k], atol=1e-12, err_msg=name)
@@ -144,7 +143,7 @@ class TestJonesConventions(unittest.TestCase):
                     a = numpy.array([vector_dot(E_in, SIGMA_I)[0], sign * vector_dot(E_in, PI_I)[0]])
                     b = J @ a
                     expected = b[0] * SIGMA_I + b[1] * sign * ee_P
-                    o0, o1, s_S, s_P = method(None, beam, None, V_IN, V_OUT,
+                    o0, o1, s_S, s_P = method(beam, V_OUT,
                                               numpy.array([J[0, 0]]), numpy.array([J[1, 1]]),
                                               r_SP=numpy.array([J[0, 1]]), r_PS=numpy.array([J[1, 0]]),
                                               use_standard=use_standard)
@@ -163,11 +162,11 @@ class TestCrystalStandardJones(unittest.TestCase):
             J = rng.normal(size=(2, 2)) + 1j * rng.normal(size=(2, 2))   # standard convention
             beam = make_beam(numpy.radians(alpha_deg), rng.normal() + 1j * rng.normal(),
                              rng.normal() + 1j * rng.normal())
-            args = (V_IN, V_OUT, numpy.array([J[0, 0]]), numpy.array([J[1, 1]]))
+            r_SS, r_PP = numpy.array([J[0, 0]]), numpy.array([J[1, 1]])
             kw = dict(r_SP=numpy.array([J[0, 1]]), r_PS=numpy.array([J[1, 0]]))
-            s0, s1, s_S, s_P = S4CrystalElement._calculate_jones_and_efield_directions_standard(None, beam, *args, **kw)
-            o0, o1, o_S, o_P = S4CrystalElement._calculate_jones_and_efield_directions(None, beam, None, *args,
-                                                                                     use_standard=1, **kw)
+            s0, s1, s_S, s_P = S4CrystalElement._calculate_jones_and_efield_directions_standard(None, beam, V_IN, V_OUT,
+                                                                                              r_SS, r_PP, **kw)
+            o0, o1, o_S, o_P = beam.calculate_jones_scattering(V_OUT, r_SS, r_PP, use_standard=1, **kw)
             field_standard = s0[:, None] * s_S + s1[:, None] * (-s_P)       # components along (u_s,f, -u_p,f)
             field_shadow = o0[:, None] * o_S + o1[:, None] * o_P
             assert_allclose(field_standard, field_shadow, atol=1e-12, err_msg="alpha=%d" % alpha_deg)
