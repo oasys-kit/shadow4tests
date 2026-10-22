@@ -115,5 +115,68 @@ class TestPhasePlateCrystal(unittest.TestCase):
         assert_allclose(out1.get_column(23), out2.get_column(23), rtol=1e-6)
 
 
+class TestPhasePlateRetardationTheory(unittest.TestCase):
+    #
+    # Independent check (not using the crystalpy amplitudes) of the sign and value of the phase retardation
+    # phi_s - phi_p = arg(t_s) - arg(t_p) of the transmitted beam, against the two-beam dynamical theory far from the
+    # Bragg angle (time factor exp(-i omega t), as in SHADOW4; fields exp(i k.r)).
+    #
+    # The fundamental equations of the two-beam theory give, for the forward wave of wavevector k0 inside the crystal
+    # (vacuum wavenumber K, polarization factor C = 1 for sigma and C = cos(2 theta_B) for pi):
+    #
+    #     (k0^2 - K^2) / K^2 = chi_0 + C^2 chi_h chi_hbar / (alpha - chi_0)
+    #
+    # where alpha = (h^2 + 2 K0.h) / K^2 is the deviation from the Bragg condition. For the symmetric Bragg case
+    # (|h| = 2 K sin theta_B, K0.h = -K |h| sin theta), alpha = 4 sin theta_B (sin theta_B - sin theta)
+    # = -2 sin(2 theta_B) Delta_theta, with Delta_theta = theta - theta_B; with the refraction correction,
+    # alpha - chi_0 = -2 sin(2 theta_B) Delta_theta, with Delta_theta measured from the corrected Bragg angle
+    # (the detuning of the plate). Far from the Bragg angle (|Delta_theta| >> Darwin width), the forward wave
+    # accumulates along the thickness T (path T / gamma_0, gamma_0 = sin theta_B) the phase
+    #
+    #     phi = K T / (2 gamma_0) [chi_0 + C^2 chi_h chi_hbar / (alpha - chi_0)]
+    #
+    # and the retardation between sigma and pi is
+    #
+    #     phi_s - phi_p = K T (1 - cos^2(2 theta_B)) Re(chi_h chi_hbar) / (2 gamma_0 (alpha - chi_0))
+    #
+    # For a centrosymmetric crystal chi_h chi_hbar > 0 (the conjugation between the exp(-i omega t) and exp(+i omega t)
+    # conventions does not change Re(chi_h chi_hbar)), so phi_s - phi_p > 0 on the low-angle side (Delta_theta < 0)
+    # and < 0 on the high-angle side, decreasing as 1/Delta_theta. Physically: below the Bragg "band gap", the
+    # coupling increases the effective refraction index of the forward wave, more for sigma (C = 1) than for pi.
+    #
+    # For an incident beam linearly polarized at 45 deg (SHADOW Jones vector (1, 1)/sqrt(2)) and the plate at
+    # alpha = 0, the transmitted Jones vector is (t_s, t_p)/sqrt(2) and S3/S0 = sin(phi_s - phi_p) |t_s||t_p| * 2 /
+    # (|t_s|^2 + |t_p|^2) (S3 > 0 is LCP, see the paper): the low-angle side gives S3 > 0.
+    #
+
+    def test_retardation_far_from_bragg(self):
+        import scipy.constants as codata
+        beam = get_source(0.5) # linear polarization at 45 deg: equal sigma and pi, in phase
+        for nhdw in [-40.0, -20.0, -10.0, 10.0, 20.0, 40.0]:
+            out, el = trace_plate(beam, detune_half_darwin_widths=nhdw)
+            j0, j1 = out.get_jones_components()          # (t_s, t_p) / sqrt(2) (alpha = 0)
+            retardation = numpy.angle(j0[0] / j1[0])     # phi_s - phi_p from SHADOW4 (crystalpy)
+
+            # two-beam theory far from the Bragg angle (see the comments above)
+            setup = el._crystalpy_diffraction_setup
+            theta_B = float(numpy.ravel(setup.angleBraggCorrected(ENERGY))[0])
+            delta_theta = el.get_detuning_angle(ENERGY)
+            chi_h_chi_hbar = complex(numpy.ravel(setup.psiH(ENERGY))[0]) * \
+                             complex(numpy.ravel(setup.psiH_bar(ENERGY))[0])
+            K = 2 * numpy.pi / (codata.h * codata.c / codata.e / ENERGY)
+            gamma_0 = numpy.sin(theta_B)
+            alpha_minus_chi_0 = -2 * numpy.sin(2 * theta_B) * delta_theta
+            expected = K * THICKNESS * (1 - numpy.cos(2 * theta_B) ** 2) * numpy.real(chi_h_chi_hbar) / \
+                       (2 * gamma_0 * alpha_minus_chi_0)
+
+            msg = "detuning %g half Darwin widths" % nhdw
+            self.assertEqual(numpy.sign(retardation), -numpy.sign(nhdw), msg=msg)  # > 0 on the low-angle side
+            assert_allclose(retardation, expected, rtol=0.01, err_msg=msg)
+            # handedness: S3/S0 = sin(phi_s - phi_p) * 2 |t_s||t_p| / (|t_s|^2 + |t_p|^2)
+            P3 = out.get_column(44)[0]
+            assert_allclose(P3, numpy.sin(retardation) * 2 * abs(j0[0] * j1[0]) / (abs(j0[0]) ** 2 + abs(j1[0]) ** 2),
+                            atol=1e-10, err_msg=msg)
+
+
 if __name__ == "__main__":
     unittest.main()
